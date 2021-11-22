@@ -1,0 +1,5 @@
+rootProject.name = 'vpnLibrary'
+
+include 'vpnLibraryMessages'
+include 'vpnLibarayServer'
+
