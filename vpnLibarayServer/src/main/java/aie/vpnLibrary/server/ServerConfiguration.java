@@ -2,7 +2,7 @@ package aie.vpnLibrary.server;
 
 public class ServerConfiguration {
     private int port;
-
+    private int numberOfPools;
     private boolean clientAuth;
 
     public static ServerConfiguration createConfiguration() {
@@ -25,5 +25,13 @@ public class ServerConfiguration {
     public ServerConfiguration setClientAuth(boolean clientAuth) {
         this.clientAuth = clientAuth;
         return this;
+    }
+
+    public int getNumberOfPools() {
+        return numberOfPools;
+    }
+
+    public void setNumberOfPools(int numberOfPools) {
+        this.numberOfPools = numberOfPools;
     }
 }
