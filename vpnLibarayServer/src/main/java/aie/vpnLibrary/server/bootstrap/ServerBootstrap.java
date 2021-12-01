@@ -1,11 +1,11 @@
-package aie.vpnLibrary.messages.bootstrap;
+package aie.vpnLibrary.server.bootstrap;
 
-import aie.vpnLibrary.messages.bootstrap.channels.IChannel;
-import aie.vpnLibrary.messages.utils.Debug;
+import aie.vpnLibrary.server.bootstrap.channels.IChannel;
+import aie.vpnLibrary.server.bootstrap.channels.MainChannel;
+import aie.vpnLibrary.server.utils.Debug;
 
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +18,7 @@ public class ServerBootstrap {
     public static final int Send_Message_To_Client = 2;
     public static final int Receive_Message_From_Client = 3;
 
+    public static final List<SocketChild> clients = new ArrayList<>();
     private Map<Integer, IChannel> channels;
     private Executor executor;
 
@@ -36,12 +37,20 @@ public class ServerBootstrap {
     public boolean bind(int port) {
         try {
             ServerSocket serverSocket = new ServerSocket(port);
+            serverSocket.setSoTimeout(5 * 60 * 1000);
+
             new Thread(() -> {
                 Thread currentThread = Thread.currentThread();
                 while (true) {
                     try {
                         Socket socket = serverSocket.accept();
+
                         executor.execute(() -> {
+                            try {
+                                socket.setKeepAlive(true);
+                            } catch (SocketException e) {
+
+                            }
                             SocketChild child = new SocketChild(socket);
                             IChannel channel = channels.get(ServerBootstrap.Client_Connected);
                             if (channel != null) {
@@ -52,16 +61,12 @@ public class ServerBootstrap {
                                     e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
                                 }
                             }
-                            IChannel mainChannel = channels.get(MAIN_CHANNEL);
-                            if (mainChannel == null) {
-                                Debug.VPN_EXCEPTION_DEBUG.println("Main Channel Not Implemented...Stopping VPN");
-                                try {
-                                    serverSocket.close();
-                                } catch (IOException e) {
-                                    currentThread.interrupt();
+                            IChannel mainChannel = new MainChannel();
 
-                                }
-
+                            try {
+                                child.setMainChannel(mainChannel);
+                            } catch (IOException e) {
+                                e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
                             }
                         });
                     } catch (IOException e) {

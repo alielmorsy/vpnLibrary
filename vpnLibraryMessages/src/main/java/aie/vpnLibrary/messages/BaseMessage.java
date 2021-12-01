@@ -6,6 +6,7 @@ public abstract class BaseMessage implements IMessage {
 
     public final static int REQUEST_MESSAGE = 21;
     public final static int RESPONSE_MESSAGE = 22;
+    public final static int KEEP_ALIVE = 0;
     private int messageType;
 
     protected BaseMessage(int messageType) {
@@ -18,6 +19,8 @@ public abstract class BaseMessage implements IMessage {
                 return new RequestMessage(byteBuffer);
             case RESPONSE_MESSAGE:
                 return new ResponseMessage(byteBuffer);
+            case KEEP_ALIVE:
+                return new KeepAliveMessage(byteBuffer);
         }
         return null;
     }

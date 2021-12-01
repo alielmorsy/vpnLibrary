@@ -18,6 +18,7 @@ public class ResponseMessage extends BaseMessage {
 
     public ResponseMessage(ByteBuffer byteBuffer) {
         super(RESPONSE_MESSAGE);
+        construct(byteBuffer);
     }
 
     @Override
@@ -40,6 +41,7 @@ public class ResponseMessage extends BaseMessage {
         buffer.get(bytes);
         data = bytes;
     }
+
     private void parseCookies(byte[] bytes) {
 
         String s = new String(bytes);
@@ -49,7 +51,7 @@ public class ResponseMessage extends BaseMessage {
         }
         String[] split = s.split(",");
         for (String ss : split) {
-            System.out.println("Cookie: "+ss);
+            System.out.println("Cookie: " + ss);
             String[] cookie = ss.split(":");
             cookies.add(new Cookie(cookie[0], cookie[1]));
         }

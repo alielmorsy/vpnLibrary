@@ -1,5 +1,7 @@
 package aie.vpnLibrary.server;
 
+import aie.vpnLibrary.server.bootstrap.ServerBootstrap;
+
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -14,6 +16,9 @@ public class VPNServer implements IServer {
 
     @Override
     public boolean bind() {
+        ServerBootstrap bootstrap = new ServerBootstrap(threadPool);
+
+        bootstrap.bind(configuration.getPort());
 
         return false;
     }
