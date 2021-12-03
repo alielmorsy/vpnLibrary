@@ -1,0 +1,2 @@
+include ":messages"
+project(":messages").projectDir = file("../vpnLibarayMessages")

@@ -12,6 +12,16 @@ public class ResponseMessage extends BaseMessage {
     private boolean isSuccess;
     private String message = "";
 
+    private int id;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public ResponseMessage() {
         super(RESPONSE_MESSAGE);
     }
@@ -24,7 +34,7 @@ public class ResponseMessage extends BaseMessage {
     @Override
     public void construct(ByteBuffer buffer) {
         ((java.nio.Buffer) buffer).position(0);
-
+        id = buffer.get();
         boolean isSuccess = buffer.get() == 1;
         this.isSuccess = isSuccess;
         if (!isSuccess) {
@@ -59,11 +69,12 @@ public class ResponseMessage extends BaseMessage {
 
     @Override
     public ByteBuffer buildSubMessage() {
-        int totaleSize = 1;
+        int totaleSize = 2;
 
         if (!isSuccess) {
             totaleSize += message.length();
             ByteBuffer buffer = ByteBuffer.allocate(totaleSize);
+            buffer.put((byte) id);
             buffer.put((byte) 0);
             buffer.put(message.getBytes());
             return buffer;
@@ -72,6 +83,7 @@ public class ResponseMessage extends BaseMessage {
             byte[] bb = parseCookies();
             totaleSize += bb.length + 1 + 4 + data.length;
             ByteBuffer buffer = ByteBuffer.allocate(totaleSize);
+            buffer.put((byte) id);
             buffer.put((byte) 1);
             buffer.put((byte) bb.length);
             buffer.put(bb);

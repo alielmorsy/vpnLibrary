@@ -1,6 +1,7 @@
-package aie.vpnLibrary.server.bootstrap;
+package aie.vpnLibraryClient;
 
-import aie.vpnLibrary.server.bootstrap.channels.IChannel;
+import aie.vpnLibrary.messages.BaseMessage;
+import aie.vpnLibrary.messages.IMessage;
 import aie.vpnLibrary.messages.utils.Debug;
 import aie.vpnLibrary.messages.utils.Utils;
 
@@ -10,31 +11,54 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
-public class SocketChild {
-    private Socket socket;
+public class ClientThread extends Thread {
+    private boolean withCharles;
+
+    private String ip;
+    private int port;
 
     private InputStream is;
     private OutputStream os;
 
-    private OnUserDisconnected observer;
-
-    private boolean connected = true;
-
-    private IChannel mainChannel;
-
-    public SocketChild(Socket socket) {
-        this.socket = socket;
-
-        init();
+    public ClientThread(boolean withCharles, String ip, int port) {
+        this.withCharles = withCharles;
+        this.ip = ip;
+        this.port = port;
     }
 
-    private void init() {
+    @Override
+    public void run() {
         try {
+            Socket socket = new Socket(ip, port);
+            socket.setKeepAlive(true);
+            socket.setSoTimeout(5 * 60 * 1000);
             is = socket.getInputStream();
             os = socket.getOutputStream();
+            while (true) {
+                ByteBuffer buffer = readData();
+                if (buffer == null) {
+                    if (socket.isClosed() || !socket.isConnected()) {
+                        return;
+                    } else {
+                        Thread.sleep(100);
+                        continue;
+                    }
+                }
+                BaseMessage message = (BaseMessage) BaseMessage.createMessage(buffer);
+                if (message == null) {
+                    writeData(ByteBuffer.allocate(0)); //TODO: Create Error Message
+                    continue;
+                }
+                if (message.getMessageType() == BaseMessage.KEEP_ALIVE) {
+                    continue;
+                } else if (message.getMessageType() == BaseMessage.REQUEST_MESSAGE) {
+                    //TODO:  implement http connection thread
+                    
+                }
 
-        } catch (IOException e) {
-            e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -76,12 +100,7 @@ public class SocketChild {
             }
             return buffer;
         } catch (Exception e) {
-
-            e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
-            if (!socket.isConnected() || socket.isClosed()) {
-                //observer.onDisconnected(this);
-                connected = false;
-            }
+            e.printStackTrace();
         }
 
         return null;
@@ -115,29 +134,9 @@ public class SocketChild {
                     return;
                 }
             }
-        } catch (Exception e){
-            e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
-            if (!socket.isConnected() || socket.isClosed()) {
-                //observer.onDisconnected(this);
-                connected = false;
-            }
+        } catch (Exception e) {
+
         }
     }
 
-    public void setObserver(OnUserDisconnected observer) {
-        this.observer = observer;
-    }
-
-    public IChannel getMainChannel() {
-        return mainChannel;
-    }
-
-    public void setMainChannel(IChannel mainChannel) throws IOException {
-        this.mainChannel = mainChannel;
-        mainChannel.runChannel(this);
-    }
-
-    public boolean isConnected() {
-        return connected;
-    }
 }

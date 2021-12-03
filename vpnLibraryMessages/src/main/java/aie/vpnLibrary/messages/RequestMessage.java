@@ -21,6 +21,9 @@ public class RequestMessage extends BaseMessage {
     private PostType postType;
     private byte[] postContent = new byte[0];
 
+
+    private int id;
+
     public RequestMessage() {
         super(BaseMessage.REQUEST_MESSAGE);
     }
@@ -38,7 +41,7 @@ public class RequestMessage extends BaseMessage {
         int method = buffer.get();
         this.method = MethodType.values()[method];
 
-        buffer.get();
+       id= buffer.get();
         buffer.get();
         byte[] headersBytes = new byte[Byte.toUnsignedInt(buffer.get())];
         buffer.get(headersBytes);
@@ -99,7 +102,7 @@ public class RequestMessage extends BaseMessage {
         }
 
         ByteBuffer buffer = ByteBuffer.allocate(totalSize);
-        buffer.put((byte) method.ordinal()).put((byte) 0).put((byte) 0).put((byte) headers.length);
+        buffer.put((byte) method.ordinal()).put((byte) id).put((byte) 0).put((byte) headers.length);
         buffer.put(headers);
         buffer.put((byte) url.length()).put(url.getBytes());
 
@@ -178,4 +181,11 @@ public class RequestMessage extends BaseMessage {
     }
 
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }

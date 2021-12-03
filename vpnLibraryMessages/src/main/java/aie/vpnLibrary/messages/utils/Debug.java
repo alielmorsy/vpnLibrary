@@ -1,4 +1,4 @@
-package aie.vpnLibrary.server.utils;
+package aie.vpnLibrary.messages.utils;
 
 import java.io.FileNotFoundException;
 import java.io.PrintStream;

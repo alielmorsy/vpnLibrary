@@ -2,7 +2,8 @@ package aie.vpnLibrary.server.bootstrap.channels;
 
 import aie.vpnLibrary.messages.BaseMessage;
 import aie.vpnLibrary.messages.IMessage;
-import aie.vpnLibrary.server.utils.Debug;
+import aie.vpnLibrary.messages.KeepAliveMessage;
+import aie.vpnLibrary.messages.utils.Debug;
 import aie.vpnLibrary.server.bootstrap.SocketChild;
 
 import java.io.IOException;
@@ -52,10 +53,10 @@ public class MainChannel implements IChannel {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-
+                messageQueue.add(new KeepAliveMessage());
             }
         };
-
+        timer.schedule(task, 40000, 40000);
     }
 
     @Override

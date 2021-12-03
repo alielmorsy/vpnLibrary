@@ -7,20 +7,25 @@ public abstract class BaseMessage implements IMessage {
     public final static int REQUEST_MESSAGE = 21;
     public final static int RESPONSE_MESSAGE = 22;
     public final static int KEEP_ALIVE = 0;
-    private int messageType;
+
+    public int getMessageType() {
+        return messageType;
+    }
+
+    private final int messageType;
 
     protected BaseMessage(int messageType) {
         this.messageType = messageType;
     }
 
-    public static BaseMessage createMessage(ByteBuffer byteBuffer) {
+    public static IMessage createMessage(ByteBuffer byteBuffer) {
         switch ((int) byteBuffer.get()) {
             case REQUEST_MESSAGE:
                 return new RequestMessage(byteBuffer);
             case RESPONSE_MESSAGE:
                 return new ResponseMessage(byteBuffer);
             case KEEP_ALIVE:
-                return new KeepAliveMessage(byteBuffer);
+                return new KeepAliveMessage();
         }
         return null;
     }

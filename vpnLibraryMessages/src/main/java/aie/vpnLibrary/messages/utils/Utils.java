@@ -1,4 +1,4 @@
-package aie.vpnLibrary.server.utils;
+package aie.vpnLibrary.messages.utils;
 
 public class Utils {
     public static byte[] intToBytes(final int data) {

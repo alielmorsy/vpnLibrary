@@ -2,7 +2,7 @@ package aie.vpnLibrary.server.bootstrap;
 
 import aie.vpnLibrary.server.bootstrap.channels.IChannel;
 import aie.vpnLibrary.server.bootstrap.channels.MainChannel;
-import aie.vpnLibrary.server.utils.Debug;
+import aie.vpnLibrary.messages.utils.Debug;
 
 import java.io.IOException;
 import java.net.*;
@@ -40,7 +40,7 @@ public class ServerBootstrap {
             serverSocket.setSoTimeout(5 * 60 * 1000);
 
             new Thread(() -> {
-                Thread currentThread = Thread.currentThread();
+
                 while (true) {
                     try {
                         Socket socket = serverSocket.accept();

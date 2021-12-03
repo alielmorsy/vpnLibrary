@@ -3,7 +3,7 @@ package aie.vpnLibrary.messages;
 import java.nio.ByteBuffer;
 
 public class KeepAliveMessage extends BaseMessage {
-    protected KeepAliveMessage(ByteBuffer byteBuffer) {
+    public KeepAliveMessage() {
         super(KEEP_ALIVE);
     }
 
