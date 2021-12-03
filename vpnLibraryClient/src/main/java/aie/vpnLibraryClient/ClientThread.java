@@ -63,7 +63,7 @@ public class ClientThread extends Thread {
     }
 
     public ByteBuffer readData() {
-        try {
+        try {   
             byte[] bb = new byte[4];
 
             int c = is.read(bb);
