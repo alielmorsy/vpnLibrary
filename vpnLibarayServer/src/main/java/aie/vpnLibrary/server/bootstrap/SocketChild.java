@@ -22,6 +22,8 @@ public class SocketChild {
 
     private IChannel mainChannel;
 
+    private String name;
+
     public SocketChild(Socket socket) {
         this.socket = socket;
 
@@ -87,7 +89,7 @@ public class SocketChild {
         return null;
     }
 
-    public void writeData(ByteBuffer byteBuffer) {
+    public boolean writeData(ByteBuffer byteBuffer) {
         try {
             os.write(Utils.intToBytes(byteBuffer.capacity()));
             int sent = 0;
@@ -112,16 +114,17 @@ public class SocketChild {
                     os.write(bytes);
                     bytes = null;
                     byteBuffer = null;
-                    return;
+                    return true;
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
             if (!socket.isConnected() || socket.isClosed()) {
                 //observer.onDisconnected(this);
                 connected = false;
             }
         }
+        return false;
     }
 
     public void setObserver(OnUserDisconnected observer) {
@@ -139,5 +142,13 @@ public class SocketChild {
 
     public boolean isConnected() {
         return connected;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

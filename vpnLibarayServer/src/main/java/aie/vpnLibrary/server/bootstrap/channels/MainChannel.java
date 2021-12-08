@@ -4,6 +4,7 @@ import aie.vpnLibrary.messages.BaseMessage;
 import aie.vpnLibrary.messages.IMessage;
 import aie.vpnLibrary.messages.KeepAliveMessage;
 import aie.vpnLibrary.messages.utils.Debug;
+import aie.vpnLibrary.server.bootstrap.ServerBootstrap;
 import aie.vpnLibrary.server.bootstrap.SocketChild;
 
 import java.io.IOException;
@@ -31,6 +32,13 @@ public class MainChannel implements IChannel {
         this.client = child;
 
         Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                messageQueue.add(new KeepAliveMessage());
+            }
+        };
+        timer.schedule(task, 40000, 40000);
         synchronized (lockObject) {
             while (client.isConnected()) {
                 IMessage message = messageQueue.poll();
@@ -45,18 +53,14 @@ public class MainChannel implements IChannel {
                         if (message == null) {
                             break;
                         }
-                        client.writeData(message.buildMessage());
+                        boolean result = client.writeData(message.buildMessage());
+                        if(!result)
+                            ServerBootstrap.clients.remove(client);
                     }
                 }
             }
         }
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                messageQueue.add(new KeepAliveMessage());
-            }
-        };
-        timer.schedule(task, 40000, 40000);
+
     }
 
     @Override
@@ -70,6 +74,7 @@ public class MainChannel implements IChannel {
     public IMessage getMessage() throws IOException {
         ByteBuffer buffer = client.readData();
         if (buffer == null) {
+            ServerBootstrap.clients.remove(client);
             return null;
         }
         return BaseMessage.createMessage(buffer);
