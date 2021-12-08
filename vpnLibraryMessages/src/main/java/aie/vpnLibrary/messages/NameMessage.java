@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 public class NameMessage extends BaseMessage {
     private String name;
 
-    protected NameMessage() {
+    public NameMessage() {
         super(NAME_MESSAGE);
     }
 
@@ -26,7 +26,8 @@ public class NameMessage extends BaseMessage {
         return name;
     }
 
-    public void setName(String name) {
+    public IMessage setName(String name) {
         this.name = name;
+        return this;
     }
 }

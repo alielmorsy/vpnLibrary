@@ -188,4 +188,12 @@ public class RequestMessage extends BaseMessage {
     public void setId(int id) {
         this.id = id;
     }
+
+    public Map<String, String> getAdditionalHeaders() {
+        return additionalHeaders;
+    }
+
+    public List<Cookie> getCookies() {
+        return cookies;
+    }
 }

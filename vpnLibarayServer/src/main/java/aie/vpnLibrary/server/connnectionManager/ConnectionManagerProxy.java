@@ -1,11 +1,14 @@
 package aie.vpnLibrary.server.connnectionManager;
 
+import aie.vpnLibrary.messages.enums.PostType;
 import aie.vpnLibrary.server.bootstrap.ServerBootstrap;
 import aie.vpnLibrary.server.bootstrap.SocketChild;
 import aie.vpnLibrary.server.exceptions.RequestException;
 import aie.vpnLibrary.server.exceptions.UserNotFoundException;
 import aie.vpnLibrary.server.model.NameValuePair;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 public class ConnectionManagerProxy implements IConnection {
@@ -14,15 +17,14 @@ public class ConnectionManagerProxy implements IConnection {
 
     private SocketChild client;
 
-    private final Object lockObject;
 
-    ConnectionManagerProxy(String clientName, Object lockObject) throws UserNotFoundException {
-        this.lockObject = lockObject;
+    public ConnectionManagerProxy(String clientName, Class<IConnection> connectionClass) throws UserNotFoundException {
+
 
         for (SocketChild child : ServerBootstrap.clients) {
             if (child.getName().equals(clientName)) {
                 client = child;
-                this.connection = new ConnectionManager(client, lockObject);
+                createIConnectionObject(connectionClass);
                 return;
             }
         }
@@ -49,7 +51,7 @@ public class ConnectionManagerProxy implements IConnection {
     }
 
     @Override
-    public String requestPOST(String url, String data, String contentType) throws UserNotFoundException, RequestException {
+    public String requestPOST(String url, String data, PostType contentType) throws UserNotFoundException, RequestException {
         if (!client.isConnected()) {
             ServerBootstrap.clients.remove(client);
             throw new UserNotFoundException(client.getName());
@@ -63,6 +65,16 @@ public class ConnectionManagerProxy implements IConnection {
             throw new UserNotFoundException(client.getName());
         }
         connection.releaseClient();
+    }
+
+    private void createIConnectionObject(Class<IConnection> clazz) {
+        Constructor<?> c = clazz.getDeclaredConstructors()[0];
+        try {
+            connection = (IConnection) c.newInstance(client);
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalArgumentException("Unknown Connection Class");
+        }
+
     }
 
 }

@@ -1,5 +1,6 @@
 package aie.vpnLibrary.server.connnectionManager;
 
+import aie.vpnLibrary.messages.enums.PostType;
 import aie.vpnLibrary.server.exceptions.RequestException;
 import aie.vpnLibrary.server.exceptions.UserNotFoundException;
 import aie.vpnLibrary.server.model.NameValuePair;
@@ -17,7 +18,7 @@ public interface IConnection {
     String requestPOST(String url, List<NameValuePair> data) throws UserNotFoundException, RequestException;
 
 
-    String requestPOST(String url, String data, String contentType) throws UserNotFoundException, RequestException;
+    String requestPOST(String url, String data, PostType contentType) throws UserNotFoundException, RequestException;
 
     void releaseClient() throws UserNotFoundException;
 }

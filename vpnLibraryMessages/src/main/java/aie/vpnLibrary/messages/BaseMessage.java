@@ -9,7 +9,7 @@ public abstract class BaseMessage implements IMessage {
     public final static int KEEP_ALIVE = 0;
     public final static int GET_NAME_MESSAGE = 1;
     public final static int NAME_MESSAGE = 10;
-
+    public final static int ERROR_MESSAGE=-1;
     public int getMessageType() {
         return messageType;
     }

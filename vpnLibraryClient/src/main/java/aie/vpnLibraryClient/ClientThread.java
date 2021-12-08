@@ -1,14 +1,17 @@
 package aie.vpnLibraryClient;
 
 import aie.vpnLibrary.messages.BaseMessage;
-import aie.vpnLibrary.messages.IMessage;
-import aie.vpnLibrary.messages.utils.Debug;
+import aie.vpnLibrary.messages.ErrorMessage;
+import aie.vpnLibrary.messages.NameMessage;
+import aie.vpnLibrary.messages.RequestMessage;
+import aie.vpnLibrary.messages.enums.MethodType;
 import aie.vpnLibrary.messages.utils.Utils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class ClientThread extends Thread {
@@ -20,10 +23,13 @@ public class ClientThread extends Thread {
     private InputStream is;
     private OutputStream os;
 
-    public ClientThread(boolean withCharles, String ip, int port) {
+    private String name;
+
+    public ClientThread(boolean withCharles, String ip, int port, String name) {
         this.withCharles = withCharles;
         this.ip = ip;
         this.port = port;
+        this.name = name;
     }
 
     @Override
@@ -46,14 +52,20 @@ public class ClientThread extends Thread {
                 }
                 BaseMessage message = (BaseMessage) BaseMessage.createMessage(buffer);
                 if (message == null) {
-                    writeData(ByteBuffer.allocate(0)); //TODO: Create Error Message
+                    writeData(new ErrorMessage().setErrorCode(-1).setErrorMessage("Null Message").buildMessage()); //TODO: Create Error Message
                     continue;
                 }
-                if (message.getMessageType() == BaseMessage.KEEP_ALIVE) {
+                if (message.getMessageType() == BaseMessage.GET_NAME_MESSAGE) {
+                    writeData(new NameMessage().setName(name).buildMessage());
+                } else if (message.getMessageType() == BaseMessage.KEEP_ALIVE) {
                     continue;
                 } else if (message.getMessageType() == BaseMessage.REQUEST_MESSAGE) {
+                    RequestMessage requestMessage= (RequestMessage) message;
+                    if(requestMessage.getMethod()== MethodType.GET){
+
+                    }
                     //TODO:  implement http connection thread
-                    
+
                 }
 
             }
@@ -63,7 +75,7 @@ public class ClientThread extends Thread {
     }
 
     public ByteBuffer readData() {
-        try {   
+        try {
             byte[] bb = new byte[4];
 
             int c = is.read(bb);
@@ -98,6 +110,7 @@ public class ClientThread extends Thread {
                 int read = is.read(bytes);
                 buffer.put(bytes, 0, read);
             }
+            ((Buffer) buffer).position(0);
             return buffer;
         } catch (Exception e) {
             e.printStackTrace();
@@ -108,6 +121,7 @@ public class ClientThread extends Thread {
 
     public void writeData(ByteBuffer byteBuffer) {
         try {
+            ((Buffer) byteBuffer).position(0);
             os.write(Utils.intToBytes(byteBuffer.capacity()));
             int sent = 0;
             int total = byteBuffer.capacity();
