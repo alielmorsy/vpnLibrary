@@ -14,7 +14,10 @@ public interface IConnection {
      */
     String requestGET(String url) throws UserNotFoundException, RequestException;
 
-    String requestPOST(String url, List<NameValuePair> data) throws UserNotFoundException,RequestException;
+    String requestPOST(String url, List<NameValuePair> data) throws UserNotFoundException, RequestException;
 
-    String requestPOST(String url, String data) throws UserNotFoundException,RequestException;
+
+    String requestPOST(String url, String data, String contentType) throws UserNotFoundException, RequestException;
+
+    void releaseClient() throws UserNotFoundException;
 }

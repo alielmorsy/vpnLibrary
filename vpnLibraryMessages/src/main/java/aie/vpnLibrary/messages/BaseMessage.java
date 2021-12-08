@@ -7,6 +7,8 @@ public abstract class BaseMessage implements IMessage {
     public final static int REQUEST_MESSAGE = 21;
     public final static int RESPONSE_MESSAGE = 22;
     public final static int KEEP_ALIVE = 0;
+    public final static int GET_NAME_MESSAGE = 1;
+    public final static int NAME_MESSAGE = 10;
 
     public int getMessageType() {
         return messageType;

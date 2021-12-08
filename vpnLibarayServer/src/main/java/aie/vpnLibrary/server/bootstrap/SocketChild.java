@@ -24,6 +24,8 @@ public class SocketChild {
 
     private String name;
 
+    private boolean used = false;
+
     public SocketChild(Socket socket) {
         this.socket = socket;
 
@@ -150,5 +152,17 @@ public class SocketChild {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean iSBlocked() {
+        return used;
+    }
+
+    public void block() {
+        used = true;
+    }
+
+    public void release() {
+        used = false;
     }
 }
