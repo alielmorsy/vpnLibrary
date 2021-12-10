@@ -12,7 +12,9 @@ public class ResponseMessage extends BaseMessage {
     private boolean isSuccess;
     private String message = "";
 
-    private int id;
+    private int id = 0;
+
+    private int errorCode = 0;
 
     public int getId() {
         return id;
@@ -38,6 +40,7 @@ public class ResponseMessage extends BaseMessage {
         boolean isSuccess = buffer.get() == 1;
         this.isSuccess = isSuccess;
         if (!isSuccess) {
+            errorCode = buffer.get();
             byte[] message = new byte[buffer.capacity() - buffer.position()];
             buffer.get(message);
             this.message = new String(message);
@@ -76,6 +79,7 @@ public class ResponseMessage extends BaseMessage {
             ByteBuffer buffer = ByteBuffer.allocate(totaleSize);
             buffer.put((byte) id);
             buffer.put((byte) 0);
+            buffer.put((byte) errorCode);
             buffer.put(message.getBytes());
             return buffer;
         } else {
@@ -137,4 +141,12 @@ public class ResponseMessage extends BaseMessage {
         this.message = message;
     }
 
+    public int getErrorCode() {
+        return errorCode;
+    }
+
+    public ResponseMessage setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
+        return this;
+    }
 }

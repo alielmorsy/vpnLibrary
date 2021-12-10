@@ -1,9 +1,6 @@
 package aie.vpnLibraryClient;
 
-import aie.vpnLibrary.messages.BaseMessage;
-import aie.vpnLibrary.messages.ErrorMessage;
-import aie.vpnLibrary.messages.NameMessage;
-import aie.vpnLibrary.messages.RequestMessage;
+import aie.vpnLibrary.messages.*;
 import aie.vpnLibrary.messages.enums.MethodType;
 import aie.vpnLibrary.messages.utils.Utils;
 
@@ -60,10 +57,15 @@ public class ClientThread extends Thread {
                 } else if (message.getMessageType() == BaseMessage.KEEP_ALIVE) {
                     continue;
                 } else if (message.getMessageType() == BaseMessage.REQUEST_MESSAGE) {
-                    RequestMessage requestMessage= (RequestMessage) message;
-                    if(requestMessage.getMethod()== MethodType.GET){
-
+                    RequestMessage requestMessage = (RequestMessage) message;
+                    if (requestMessage.getMethod() == MethodType.GET) {
+                        ResponseMessage rm = ConnectionManager.getInstance(withCharles).requestGET(requestMessage);
+                        writeData(rm.buildMessage());
+                    }else{
+                        ResponseMessage rm = ConnectionManager.getInstance(withCharles).requestPOST(requestMessage);
+                        writeData(rm.buildMessage());
                     }
+
                     //TODO:  implement http connection thread
 
                 }

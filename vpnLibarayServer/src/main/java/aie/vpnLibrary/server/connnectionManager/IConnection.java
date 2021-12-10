@@ -13,12 +13,14 @@ public interface IConnection {
      * @param url the http url
      * @return http response
      */
-    String requestGET(String url) throws UserNotFoundException, RequestException;
+    byte[] requestGET(String url) throws UserNotFoundException, RequestException;
 
-    String requestPOST(String url, List<NameValuePair> data) throws UserNotFoundException, RequestException;
+    byte[] requestPOST(String url, List<NameValuePair> data) throws UserNotFoundException, RequestException;
 
 
-    String requestPOST(String url, String data, PostType contentType) throws UserNotFoundException, RequestException;
+    byte[] requestPOST(String url, String data, PostType contentType) throws UserNotFoundException, RequestException;
+    byte[] requestPOST(String url, byte[] data, PostType contentType) throws UserNotFoundException, RequestException;
+
 
     void releaseClient() throws UserNotFoundException;
 }
