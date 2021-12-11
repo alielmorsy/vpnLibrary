@@ -31,7 +31,8 @@ public class ServerConfiguration {
         return numberOfPools;
     }
 
-    public void setNumberOfPools(int numberOfPools) {
+    public ServerConfiguration setNumberOfPools(int numberOfPools) {
         this.numberOfPools = numberOfPools;
+        return this;
     }
 }

@@ -18,9 +18,10 @@ public class ErrorMessage extends BaseMessage {
     }
 
     @Override
-    public void construct(ByteBuffer buffer) {
+    public IMessage construct(ByteBuffer buffer) {
         errorCode = buffer.get();
         errorMessage = new String(buffer.slice().array());
+        return this;
     }
 
 

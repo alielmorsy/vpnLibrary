@@ -13,7 +13,7 @@ public class GetNameMessage extends BaseMessage {
     }
 
     @Override
-    public void construct(ByteBuffer buffer) {
-
+    public IMessage construct(ByteBuffer buffer) {
+        return this;
     }
 }

@@ -11,7 +11,7 @@ import java.net.Socket;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
-public class ClientThread extends Thread {
+public class  ClientThread extends Thread {
     private boolean withCharles;
 
     private String ip;
@@ -55,6 +55,7 @@ public class ClientThread extends Thread {
                 if (message.getMessageType() == BaseMessage.GET_NAME_MESSAGE) {
                     writeData(new NameMessage().setName(name).buildMessage());
                 } else if (message.getMessageType() == BaseMessage.KEEP_ALIVE) {
+                    System.out.println("KEEP_ALIVE");
                     continue;
                 } else if (message.getMessageType() == BaseMessage.REQUEST_MESSAGE) {
                     RequestMessage requestMessage = (RequestMessage) message;
@@ -112,6 +113,7 @@ public class ClientThread extends Thread {
                 int read = is.read(bytes);
                 buffer.put(bytes, 0, read);
             }
+            System.out.println(new String(buffer.array()));
             ((Buffer) buffer).position(0);
             return buffer;
         } catch (Exception e) {
@@ -123,11 +125,12 @@ public class ClientThread extends Thread {
 
     public void writeData(ByteBuffer byteBuffer) {
         try {
-            ((Buffer) byteBuffer).position(0);
+            System.out.println(new String(byteBuffer.array()));
+            ((java.nio.Buffer) byteBuffer).position(0);
             os.write(Utils.intToBytes(byteBuffer.capacity()));
             int sent = 0;
             int total = byteBuffer.capacity();
-            ((java.nio.Buffer) byteBuffer).position(0);
+
             byte[] bytes;
             while (true) {
                 int size = Math.abs(total - sent);

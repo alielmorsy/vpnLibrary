@@ -2,11 +2,11 @@ package aie.vpnLibrary.messages;
 
 import java.nio.ByteBuffer;
 
-public interface IMessage {
+public interface IMessage extends Comparable<IMessage>{
 
     ByteBuffer buildMessage();
 
     ByteBuffer buildSubMessage();
 
-    void construct(ByteBuffer buffer);
+    IMessage construct(ByteBuffer buffer);
 }

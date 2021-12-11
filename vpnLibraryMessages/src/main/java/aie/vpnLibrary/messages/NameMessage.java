@@ -7,6 +7,7 @@ public class NameMessage extends BaseMessage {
 
     public NameMessage() {
         super(NAME_MESSAGE);
+
     }
 
     @Override
@@ -16,10 +17,12 @@ public class NameMessage extends BaseMessage {
     }
 
     @Override
-    public void construct(ByteBuffer buffer) {
-        byte[] bytes = new byte[buffer.capacity()];
+    public IMessage construct(ByteBuffer buffer) {
+        byte[] bytes = new byte[buffer.capacity()-buffer.position()];
         buffer.get(bytes);
         name = new String(bytes, 0, bytes.length);
+        System.out.println(name);
+        return this;
     }
 
     public String getName() {

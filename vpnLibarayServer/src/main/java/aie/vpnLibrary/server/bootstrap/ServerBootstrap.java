@@ -1,8 +1,14 @@
 package aie.vpnLibrary.server.bootstrap;
 
+import aie.vpnLibrary.messages.RequestMessage;
+import aie.vpnLibrary.messages.enums.PostType;
 import aie.vpnLibrary.server.bootstrap.channels.IChannel;
 import aie.vpnLibrary.server.bootstrap.channels.MainChannel;
 import aie.vpnLibrary.messages.utils.Debug;
+import aie.vpnLibrary.server.connnectionManager.ConnectionManager;
+import aie.vpnLibrary.server.exceptions.OfficeInUse;
+import aie.vpnLibrary.server.exceptions.RequestException;
+import aie.vpnLibrary.server.exceptions.UserNotFoundException;
 
 import java.io.IOException;
 import java.net.*;
@@ -53,6 +59,7 @@ public class ServerBootstrap {
                             }
                             SocketChild child = new SocketChild(socket);
                             IChannel channel = channels.get(ServerBootstrap.Client_Connected);
+                            System.out.println("Client Connected");
                             if (channel != null) {
                                 try {
                                     channel.runChannel(child);
@@ -61,12 +68,25 @@ public class ServerBootstrap {
                                     e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
                                 }
                             }
-                            IChannel mainChannel = new MainChannel();
 
+                            IChannel mainChannel = new MainChannel();
+                            ServerBootstrap.clients.add(child);
                             try {
                                 child.setMainChannel(mainChannel);
                             } catch (IOException e) {
                                 e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
+                            }
+                            try {
+                                ConnectionManager manager = new ConnectionManager("a") {
+                                    @Override
+                                    public void editRequest(RequestMessage requestMessage) {
+
+                                    }
+                                };
+                                System.out.println(new String(manager.requestGET("https://xero.gg")));
+                                System.out.println(new String(manager.requestPOST("https://xero.gg", "a=1", PostType.FORM_DATA)));
+                            } catch (UserNotFoundException | OfficeInUse | RequestException e) {
+                                e.printStackTrace();
                             }
                         });
                     } catch (IOException e) {

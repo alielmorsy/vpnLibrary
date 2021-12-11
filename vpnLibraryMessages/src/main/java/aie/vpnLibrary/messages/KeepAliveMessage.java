@@ -13,7 +13,12 @@ public class KeepAliveMessage extends BaseMessage {
     }
 
     @Override
-    public void construct(ByteBuffer buffer) {
+    public IMessage construct(ByteBuffer buffer) {
 
+        return this;}
+
+    @Override
+    public int compareTo(IMessage o) {
+        return 0;
     }
 }

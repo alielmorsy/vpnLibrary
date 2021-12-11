@@ -17,14 +17,15 @@ import java.util.TimerTask;
 public class MainChannel implements IChannel {
     private Queue<IMessage> messageQueue;
 
-    private final Object lockObject = new Object();
+    private Object lockObject;
 
 
     private SocketChild client;
 
+    private boolean write = true;
+
     public MainChannel() {
         messageQueue = new PriorityQueue<>();
-
     }
 
     @Override
@@ -35,38 +36,20 @@ public class MainChannel implements IChannel {
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
-                messageQueue.add(new KeepAliveMessage());
+                System.out.println("AddTasked");
+                if (write)
+                    client.writeData(new KeepAliveMessage().buildMessage());
             }
         };
-        timer.schedule(task, 40000, 40000);
-        synchronized (lockObject) {
-            while (client.isConnected()) {
-                IMessage message = messageQueue.poll();
-                if (message == null) {
-                    synchronized (lockObject) {
-                        try {
-                            lockObject.wait();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
-                        }
-                        message = messageQueue.poll();
-                        if (message == null) {
-                            break;
-                        }
-                        boolean result = client.writeData(message.buildMessage());
-                        if(!result)
-                            ServerBootstrap.clients.remove(client);
-                    }
-                }
-            }
-        }
+        timer.schedule(task, 1000, 40000);
 
     }
 
     @Override
     public void writeMessage(IMessage message) throws IOException {
-        messageQueue.add(message);
-        lockObject.notifyAll();
+        write = false;
+        client.writeData(message.buildMessage());
+        write = true;
 
     }
 
@@ -81,4 +64,39 @@ public class MainChannel implements IChannel {
 
     }
 
+    private void startLock() {
+        synchronized (lockObject) {
+            while (client.isConnected()) {
+                IMessage message = messageQueue.poll();
+                if (message == null) {
+                    synchronized (lockObject) {
+                        try {
+                            System.out.println("Waited");
+                            lockObject.wait();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
+                        }
+                        System.out.println("End Waiting");
+                        message = messageQueue.poll();
+                        if (message == null) {
+                            break;
+                        }
+                        System.out.println("Writing A Message");
+                        write = false;
+                        boolean result = client.writeData(message.buildMessage());
+                        if (!result)
+                            ServerBootstrap.clients.remove(client);
+                        write = true;
+                    }
+                }
+            }
+        }
+
+    }
+
+    public MainChannel setLockObject(Object lockObject) {
+        this.lockObject = lockObject;
+
+        return this;
+    }
 }

@@ -28,14 +28,11 @@ public class ResponseMessage extends BaseMessage {
         super(RESPONSE_MESSAGE);
     }
 
-    public ResponseMessage(ByteBuffer byteBuffer) {
-        super(RESPONSE_MESSAGE);
-        construct(byteBuffer);
-    }
+
 
     @Override
-    public void construct(ByteBuffer buffer) {
-        ((java.nio.Buffer) buffer).position(0);
+    public IMessage construct(ByteBuffer buffer) {
+
         id = buffer.get();
         boolean isSuccess = buffer.get() == 1;
         this.isSuccess = isSuccess;
@@ -44,7 +41,7 @@ public class ResponseMessage extends BaseMessage {
             byte[] message = new byte[buffer.capacity() - buffer.position()];
             buffer.get(message);
             this.message = new String(message);
-            return;
+            return this;
         }
 
         byte[] bytes = new byte[Byte.toUnsignedInt(buffer.get())];
@@ -53,7 +50,7 @@ public class ResponseMessage extends BaseMessage {
         bytes = new byte[buffer.getInt()];
         buffer.get(bytes);
         data = bytes;
-    }
+        return this; }
 
     private void parseCookies(byte[] bytes) {
 

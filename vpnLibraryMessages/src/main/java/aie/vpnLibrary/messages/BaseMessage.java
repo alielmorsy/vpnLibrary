@@ -9,7 +9,8 @@ public abstract class BaseMessage implements IMessage {
     public final static int KEEP_ALIVE = 0;
     public final static int GET_NAME_MESSAGE = 1;
     public final static int NAME_MESSAGE = 10;
-    public final static int ERROR_MESSAGE=-1;
+    public final static int ERROR_MESSAGE = -1;
+
     public int getMessageType() {
         return messageType;
     }
@@ -21,13 +22,20 @@ public abstract class BaseMessage implements IMessage {
     }
 
     public static IMessage createMessage(ByteBuffer byteBuffer) {
+
         switch ((int) byteBuffer.get()) {
             case REQUEST_MESSAGE:
-                return new RequestMessage(byteBuffer);
+                return new RequestMessage().construct(byteBuffer);
             case RESPONSE_MESSAGE:
-                return new ResponseMessage(byteBuffer);
+                return new ResponseMessage().construct(byteBuffer);
             case KEEP_ALIVE:
-                return new KeepAliveMessage();
+                return new KeepAliveMessage().construct(byteBuffer);
+            case GET_NAME_MESSAGE:
+                return new GetNameMessage().construct(byteBuffer);
+            case NAME_MESSAGE:
+                return new NameMessage().construct(byteBuffer);
+            case ERROR_MESSAGE:
+                return new ErrorMessage().construct(byteBuffer);
         }
         return null;
     }
@@ -43,4 +51,9 @@ public abstract class BaseMessage implements IMessage {
     }
 
     public abstract ByteBuffer buildSubMessage();
+
+    @Override
+    public int compareTo(IMessage o) {
+        return 0;
+    }
 }

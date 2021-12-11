@@ -7,10 +7,7 @@ import aie.vpnLibrary.messages.models.Cookie;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RequestMessage extends BaseMessage {
     private final Map<String, String> additionalHeaders = new HashMap<>();
@@ -28,20 +25,17 @@ public class RequestMessage extends BaseMessage {
         super(BaseMessage.REQUEST_MESSAGE);
     }
 
-    public RequestMessage(ByteBuffer byteBuffer) {
-        super(BaseMessage.REQUEST_MESSAGE);
-        construct(byteBuffer);
-    }
 
     @Override
-    public void construct(ByteBuffer buffer) {
-        ((Buffer) buffer).position(0);
+    public IMessage construct(ByteBuffer buffer) {
+        System.out.println(Arrays.toString(buffer.array()));
 
-        System.out.println(new String(buffer.array()));
+
+
         int method = buffer.get();
         this.method = MethodType.values()[method];
 
-       id= buffer.get();
+        id = buffer.get();
         buffer.get();
         byte[] headersBytes = new byte[Byte.toUnsignedInt(buffer.get())];
         buffer.get(headersBytes);
@@ -65,6 +59,7 @@ public class RequestMessage extends BaseMessage {
             buffer.get(postContent);
             this.postContent = postContent;
         }
+        return this;
     }
 
     private void parseHeaders(byte[] bytes) {

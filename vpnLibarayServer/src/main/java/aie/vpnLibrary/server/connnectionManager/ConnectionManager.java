@@ -8,6 +8,7 @@ import aie.vpnLibrary.messages.models.Cookie;
 import aie.vpnLibrary.messages.utils.Debug;
 import aie.vpnLibrary.server.bootstrap.ServerBootstrap;
 import aie.vpnLibrary.server.bootstrap.SocketChild;
+import aie.vpnLibrary.server.bootstrap.channels.MainChannel;
 import aie.vpnLibrary.server.exceptions.OfficeInUse;
 import aie.vpnLibrary.server.exceptions.RequestException;
 import aie.vpnLibrary.server.exceptions.UserNotFoundException;
@@ -35,6 +36,9 @@ public abstract class ConnectionManager implements IConnection {
                 if (child.iSBlocked()) {
                     throw new OfficeInUse(clientName);
                 }
+                MainChannel c = (MainChannel) client.getMainChannel();
+                c.setLockObject(new Object());
+                child.block();
                 return;
             }
         }
@@ -115,17 +119,19 @@ public abstract class ConnectionManager implements IConnection {
     public abstract void editRequest(RequestMessage requestMessage);
 
     private ResponseMessage runRequest(RequestMessage message) {
-        client.writeData(message.buildMessage());
         try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
+            System.out.println("Write Message");
+            client.getMainChannel().writeMessage(message);
             try {
-                releaseClient();
-            } catch (UserNotFoundException userNotFoundException) {
-                userNotFoundException.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                try {
+                    releaseClient();
+                } catch (UserNotFoundException userNotFoundException) {
+                    userNotFoundException.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
+                }
             }
-        }
-        try {
+
             return (ResponseMessage) client.getMainChannel().getMessage();
         } catch (IOException e) {
             e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);

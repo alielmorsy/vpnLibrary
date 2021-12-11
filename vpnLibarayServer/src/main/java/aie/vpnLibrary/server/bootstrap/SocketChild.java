@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class SocketChild {
@@ -78,6 +79,8 @@ public class SocketChild {
                 int read = is.read(bytes);
                 buffer.put(bytes, 0, read);
             }
+            System.out.println(new String(buffer.array()));
+            ((Buffer) buffer).position(0);
             return buffer;
         } catch (Exception e) {
 
