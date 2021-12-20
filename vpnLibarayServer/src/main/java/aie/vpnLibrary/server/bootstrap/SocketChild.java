@@ -85,10 +85,9 @@ public class SocketChild {
         } catch (Exception e) {
 
             e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
-            if (!socket.isConnected() || socket.isClosed()) {
-                //observer.onDisconnected(this);
-                connected = false;
-            }
+            ServerBootstrap.clients.remove(this);
+            //observer.onDisconnected(this);
+            connected = false;
         }
 
         return null;
@@ -124,10 +123,8 @@ public class SocketChild {
             }
         } catch (Exception e) {
             e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
-            if (!socket.isConnected() || socket.isClosed()) {
-                //observer.onDisconnected(this);
-                connected = false;
-            }
+            connected = false;
+            ServerBootstrap.clients.remove(this);
         }
         return false;
     }

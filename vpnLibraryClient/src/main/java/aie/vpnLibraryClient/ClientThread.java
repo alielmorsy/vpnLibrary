@@ -11,7 +11,7 @@ import java.net.Socket;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
-public class  ClientThread extends Thread {
+public class ClientThread extends Thread {
     private boolean withCharles;
 
     private String ip;
@@ -55,19 +55,19 @@ public class  ClientThread extends Thread {
                 if (message.getMessageType() == BaseMessage.GET_NAME_MESSAGE) {
                     writeData(new NameMessage().setName(name).buildMessage());
                 } else if (message.getMessageType() == BaseMessage.KEEP_ALIVE) {
-                    System.out.println("KEEP_ALIVE");
+
                     continue;
                 } else if (message.getMessageType() == BaseMessage.REQUEST_MESSAGE) {
                     RequestMessage requestMessage = (RequestMessage) message;
-                    if (requestMessage.getMethod() == MethodType.GET) {
-                        ResponseMessage rm = ConnectionManager.getInstance(withCharles).requestGET(requestMessage);
-                        writeData(rm.buildMessage());
-                    }else{
-                        ResponseMessage rm = ConnectionManager.getInstance(withCharles).requestPOST(requestMessage);
-                        writeData(rm.buildMessage());
-                    }
 
-                    //TODO:  implement http connection thread
+                    ResponseMessage rm;
+                    if (requestMessage.getMethod() == MethodType.GET) {
+                        rm = ConnectionManager.getInstance(withCharles).requestGET(requestMessage);
+                    } else {
+                        rm = ConnectionManager.getInstance(withCharles).requestPOST(requestMessage);
+                    }
+                    writeData(rm.buildMessage());
+
 
                 }
 
@@ -125,7 +125,7 @@ public class  ClientThread extends Thread {
 
     public void writeData(ByteBuffer byteBuffer) {
         try {
-            System.out.println(new String(byteBuffer.array()));
+
             ((java.nio.Buffer) byteBuffer).position(0);
             os.write(Utils.intToBytes(byteBuffer.capacity()));
             int sent = 0;

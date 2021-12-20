@@ -59,7 +59,7 @@ public class ServerBootstrap {
                             }
                             SocketChild child = new SocketChild(socket);
                             IChannel channel = channels.get(ServerBootstrap.Client_Connected);
-                            System.out.println("Client Connected");
+                            System.out.println("Office Connected");
                             if (channel != null) {
                                 try {
                                     channel.runChannel(child);
@@ -76,23 +76,11 @@ public class ServerBootstrap {
                             } catch (IOException e) {
                                 e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
                             }
-                            try {
-                                ConnectionManager manager = new ConnectionManager("a") {
-                                    @Override
-                                    public void editRequest(RequestMessage requestMessage) {
 
-                                    }
-                                };
-                                System.out.println(new String(manager.requestGET("https://xero.gg")));
-                                System.out.println(new String(manager.requestPOST("https://xero.gg", "a=1", PostType.FORM_DATA)));
-                            } catch (UserNotFoundException | OfficeInUse | RequestException e) {
-                                e.printStackTrace();
-                            }
                         });
                     } catch (IOException e) {
 
-                        Debug.VPN_EXCEPTION_DEBUG.println("Exception In Bind Looping");
-                        e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
+
                     }
                 }
             }).start();

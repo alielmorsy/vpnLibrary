@@ -3,8 +3,9 @@ plugins {
 }
 
 group 'aie.vpnLibrary.server'
-version '0.1'
-
+version '0.2'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 repositories {
     mavenCentral()
 }
@@ -12,4 +13,9 @@ repositories {
 dependencies {
     compile project (":vpnLibraryMessages")
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+task fatJarServer(type: Jar) {
+
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }

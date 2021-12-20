@@ -24,6 +24,8 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +45,7 @@ public class ConnectionManager {
     }
 
     public ResponseMessage requestGET(RequestMessage request) {
+        //HttpGet httpGet = new HttpGet("http://127.0.0.1/a.php");
         HttpGet httpGet = new HttpGet(request.getUrl());
         for (Map.Entry<String, String> headers :
                 request.getAdditionalHeaders().entrySet()) {
@@ -63,6 +66,7 @@ public class ConnectionManager {
         }
         try {
             response.setData(Utils.readAllBytes(httpResponse.getEntity().getContent()));
+
         } catch (Exception e) {
             e.printStackTrace();
             response.setSuccess(false);
@@ -76,7 +80,7 @@ public class ConnectionManager {
 
     public ResponseMessage requestPOST(RequestMessage request) {
         HttpPost post = new HttpPost(request.getUrl());
-        //HttpPost post = new HttpPost(request.getUrl());
+      //  HttpPost post = new HttpPost("http://127.0.0.1/a.php");
         for (Map.Entry<String, String> headers :
                 request.getAdditionalHeaders().entrySet()) {
             post.addHeader(headers.getKey(), headers.getValue());
@@ -86,7 +90,7 @@ public class ConnectionManager {
             contentType = ContentType.APPLICATION_FORM_URLENCODED;
         } else {
             contentType = ContentType.TEXT_XML;
-            post.setHeader("Accecpt", "application/soap+xml, application/dime, multipart/related, text/*");
+            post.setHeader("Accept", "application/soap+xml, application/dime, multipart/related, text/*");
         }
         contentType.withCharset(StandardCharsets.UTF_8);
         post.setEntity(new InputStreamEntity(new ByteArrayInputStream(request.getPostContent()), contentType));
@@ -103,6 +107,7 @@ public class ConnectionManager {
         }
         try {
             response.setData(Utils.readAllBytes(httpResponse.getEntity().getContent()));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -114,7 +119,7 @@ public class ConnectionManager {
 
     private HttpResponse createRequest(HttpRequestBase request, List<aie.vpnLibrary.messages.models.Cookie> cookies) {
         try {
-            request.addHeader("Accept", "image/jpeg, application/x-ms-application, image/gif, application/xaml+xml, image/pjpeg, application/x-ms-xbap, application/msword, application/vnd.ms-powerpoint, application/vnd.ms-excel, */*");
+          //  request.addHeader("Accept", "image/jpeg, application/x-ms-application, image/gif, application/xaml+xml, image/pjpeg, application/x-ms-xbap, application/msword, application/vnd.ms-powerpoint, application/vnd.ms-excel, */*");
 
 
             HttpClientContext context = new HttpClientContext();
@@ -124,7 +129,7 @@ public class ConnectionManager {
 
                 for (Cookie c : cookies) {
                     BasicClientCookie cookie = new BasicClientCookie(c.getKey(), c.getValue());
-
+                    cookie.setDomain(request.getURI().getHost());
                     cookie.setExpiryDate(new Date(System.currentTimeMillis() + 1000000));
                     cs.addCookie(cookie);
                 }
@@ -137,10 +142,8 @@ public class ConnectionManager {
             }
             httpClient.setUserAgent("Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)");
             httpClient.setSSLContext(createContext());
-            long start = System.nanoTime();
+
             HttpResponse response = httpClient.build().execute(request, context);
-            long done = System.nanoTime();
-            System.out.println("Execute time: " + (done - start) / 1000000f);
             //     if (response.getStatusLine().getStatusCode() == 302) hasDirect = true;
             //   if (context.getCookieStore() != null && context.getCookieStore().getCookies().size() != 0)
             cookies.clear();

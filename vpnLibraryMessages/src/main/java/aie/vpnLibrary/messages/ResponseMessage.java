@@ -29,11 +29,9 @@ public class ResponseMessage extends BaseMessage {
     }
 
 
-
     @Override
     public IMessage construct(ByteBuffer buffer) {
 
-        id = buffer.get();
         boolean isSuccess = buffer.get() == 1;
         this.isSuccess = isSuccess;
         if (!isSuccess) {
@@ -44,13 +42,14 @@ public class ResponseMessage extends BaseMessage {
             return this;
         }
 
-        byte[] bytes = new byte[Byte.toUnsignedInt(buffer.get())];
+        byte[] bytes = new byte[Short.toUnsignedInt(buffer.getShort())];
         buffer.get(bytes);
         parseCookies(bytes);
         bytes = new byte[buffer.getInt()];
         buffer.get(bytes);
         data = bytes;
-        return this; }
+        return this;
+    }
 
     private void parseCookies(byte[] bytes) {
 
@@ -61,7 +60,7 @@ public class ResponseMessage extends BaseMessage {
         }
         String[] split = s.split(",");
         for (String ss : split) {
-            System.out.println("Cookie: " + ss);
+
             String[] cookie = ss.split(":");
             cookies.add(new Cookie(cookie[0], cookie[1]));
         }
@@ -69,12 +68,12 @@ public class ResponseMessage extends BaseMessage {
 
     @Override
     public ByteBuffer buildSubMessage() {
-        int totaleSize = 2;
+        int totaleSize = 3;
 
         if (!isSuccess) {
             totaleSize += message.length();
             ByteBuffer buffer = ByteBuffer.allocate(totaleSize);
-            buffer.put((byte) id);
+
             buffer.put((byte) 0);
             buffer.put((byte) errorCode);
             buffer.put(message.getBytes());
@@ -82,11 +81,11 @@ public class ResponseMessage extends BaseMessage {
         } else {
 
             byte[] bb = parseCookies();
-            totaleSize += bb.length + 1 + 4 + data.length;
+            totaleSize += bb.length + 2 + 4 + data.length;
             ByteBuffer buffer = ByteBuffer.allocate(totaleSize);
-            buffer.put((byte) id);
+
             buffer.put((byte) 1);
-            buffer.put((byte) bb.length);
+            buffer.putShort((short) bb.length);
             buffer.put(bb);
             buffer.putInt(data.length);
             buffer.put(data);

@@ -28,22 +28,19 @@ public class RequestMessage extends BaseMessage {
 
     @Override
     public IMessage construct(ByteBuffer buffer) {
-        System.out.println(Arrays.toString(buffer.array()));
-
 
 
         int method = buffer.get();
         this.method = MethodType.values()[method];
 
-        id = buffer.get();
         buffer.get();
-        byte[] headersBytes = new byte[Byte.toUnsignedInt(buffer.get())];
+        byte[] headersBytes = new byte[Short.toUnsignedInt(buffer.getShort())];
         buffer.get(headersBytes);
         parseHeaders(headersBytes);
 
-        byte[] urlBytes = new byte[Byte.toUnsignedInt(buffer.get())];
+        byte[] urlBytes = new byte[Short.toUnsignedInt(buffer.getShort())];
         buffer.get(urlBytes);
-        System.out.println(urlBytes.length);
+
         url = new String(urlBytes, StandardCharsets.UTF_8);
 
         byte[] cookiesBytes = new byte[Byte.toUnsignedInt(buffer.get())];
@@ -62,44 +59,21 @@ public class RequestMessage extends BaseMessage {
         return this;
     }
 
-    private void parseHeaders(byte[] bytes) {
-        String s = new String(bytes);
-        if (s.length() == 0) return;
-        String[] a = s.split(",");
-        for (String header : a) {
-            String[] hh = header.split(":");
-            additionalHeaders.put(hh[0], hh[1]);
-        }
-    }
-
-    private void parseCookies(byte[] cookiesBytes) {
-        String s = new String(cookiesBytes);
-
-        String[] a = s.split(",");
-        if (s.length() == 0) {
-            return;
-        }
-
-        for (String header : a) {
-            System.out.println("Cookie: " + header);
-            String[] hh = header.split(":");
-            setCookie(hh[0], hh[1]);
-        }
-    }
 
     @Override
     public ByteBuffer buildSubMessage() {
         byte[] headers = parseHeaders();
+
         byte[] cookies = parseCookies();
-        int totalSize = 4 + headers.length + 1 + url.length() + 1 + cookies.length + 1;
+        int totalSize = 4 + headers.length + 2 + url.length() + 1 + cookies.length + 1;
         if (method == MethodType.POST) {
             totalSize += 2 + postContent.length;
         }
 
         ByteBuffer buffer = ByteBuffer.allocate(totalSize);
-        buffer.put((byte) method.ordinal()).put((byte) id).put((byte) 0).put((byte) headers.length);
+        buffer.put((byte) method.ordinal()).put((byte) 0).putShort((short) headers.length);
         buffer.put(headers);
-        buffer.put((byte) url.length()).put(url.getBytes());
+        buffer.putShort((short) url.length()).put(url.getBytes());
 
         buffer.put((byte) cookies.length);
 
@@ -114,6 +88,32 @@ public class RequestMessage extends BaseMessage {
 
     }
 
+
+    private void parseHeaders(byte[] bytes) {
+        String s = new String(bytes);
+        if (s.length() == 0) return;
+
+        String[] a = s.split(",");
+        for (String header : a) {
+            String[] hh = header.replace('\0', ',').split(":");
+            additionalHeaders.put(hh[0], hh[1]);
+        }
+    }
+
+    private void parseCookies(byte[] cookiesBytes) {
+        String s = new String(cookiesBytes);
+
+        String[] a = s.split(",");
+        if (s.length() == 0) {
+            return;
+        }
+
+        for (String header : a) {
+
+            String[] hh = header.split(":");
+            setCookie(hh[0], hh[1]);
+        }
+    }
 
     private byte[] parseHeaders() {
         StringBuilder s = new StringBuilder();

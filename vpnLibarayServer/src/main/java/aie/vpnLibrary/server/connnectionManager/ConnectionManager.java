@@ -120,6 +120,7 @@ public abstract class ConnectionManager implements IConnection {
 
     private ResponseMessage runRequest(RequestMessage message) {
         try {
+             message.getCookies().addAll(cookies);
             System.out.println("Write Message");
             client.getMainChannel().writeMessage(message);
             try {
@@ -147,6 +148,12 @@ public abstract class ConnectionManager implements IConnection {
         if (!m.isSuccess()) {
             throw new RequestException(client.getName(), m.getMessage(), m.getErrorCode());
         }
+        if (m.getCookies().size() != 0) {
+            cookies.clear();
+            cookies.addAll(m.getCookies());
+        }
+
+
         return m.getData();
     }
 }

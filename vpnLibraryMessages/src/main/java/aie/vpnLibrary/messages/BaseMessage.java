@@ -1,5 +1,6 @@
 package aie.vpnLibrary.messages;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public abstract class BaseMessage implements IMessage {
@@ -10,6 +11,7 @@ public abstract class BaseMessage implements IMessage {
     public final static int GET_NAME_MESSAGE = 1;
     public final static int NAME_MESSAGE = 10;
     public final static int ERROR_MESSAGE = -1;
+    public final static int DISCONNECT_MESSAGE = -2;
 
     public int getMessageType() {
         return messageType;
@@ -22,7 +24,7 @@ public abstract class BaseMessage implements IMessage {
     }
 
     public static IMessage createMessage(ByteBuffer byteBuffer) {
-
+        ((Buffer) byteBuffer).position(0);
         switch ((int) byteBuffer.get()) {
             case REQUEST_MESSAGE:
                 return new RequestMessage().construct(byteBuffer);
@@ -36,13 +38,16 @@ public abstract class BaseMessage implements IMessage {
                 return new NameMessage().construct(byteBuffer);
             case ERROR_MESSAGE:
                 return new ErrorMessage().construct(byteBuffer);
+            case DISCONNECT_MESSAGE:
+                return new DisconnectMessage().construct(byteBuffer);
         }
         return null;
     }
 
     @Override
     public ByteBuffer buildMessage() {
-        ByteBuffer subMessage = buildSubMessage().position(0);
+        ByteBuffer subMessage = buildSubMessage();
+        ((Buffer) subMessage).position(0);
         ByteBuffer message = ByteBuffer.allocate(1 + subMessage.capacity());
         message.put((byte) messageType);
         message.put(subMessage);

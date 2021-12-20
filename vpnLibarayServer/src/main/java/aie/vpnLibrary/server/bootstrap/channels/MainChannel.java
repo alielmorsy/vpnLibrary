@@ -23,6 +23,7 @@ public class MainChannel implements IChannel {
     private SocketChild client;
 
     private boolean write = true;
+    private Timer timer;
 
     public MainChannel() {
         messageQueue = new PriorityQueue<>();
@@ -32,24 +33,35 @@ public class MainChannel implements IChannel {
     public void runChannel(SocketChild child) throws IOException {
         this.client = child;
 
-        Timer timer = new Timer();
+        timer = new Timer();
         TimerTask task = new TimerTask() {
             @Override
             public void run() {
                 System.out.println("AddTasked");
-                if (write)
-                    client.writeData(new KeepAliveMessage().buildMessage());
+                if (write) {
+                    if (!client.writeData(new KeepAliveMessage().buildMessage())) {
+                        timer.cancel();
+                        timer = null;
+                        System.gc();
+                    }
+                }
+
             }
         };
-        timer.schedule(task, 1000, 40000);
+        timer.schedule(task, 20000, 40000);
 
     }
 
     @Override
     public void writeMessage(IMessage message) throws IOException {
         write = false;
-        client.writeData(message.buildMessage());
-        write = true;
+        if (!client.writeData(message.buildMessage())) {
+            timer.cancel();
+            timer = null;
+            System.gc();
+        } else
+
+            write = true;
 
     }
 

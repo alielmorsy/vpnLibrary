@@ -1,14 +1,12 @@
 package aie.vpnLibrary.server.bootstrap.channels;
 
-import aie.vpnLibrary.messages.BaseMessage;
-import aie.vpnLibrary.messages.GetNameMessage;
-import aie.vpnLibrary.messages.IMessage;
-import aie.vpnLibrary.messages.NameMessage;
+import aie.vpnLibrary.messages.*;
 import aie.vpnLibrary.server.bootstrap.ServerBootstrap;
 import aie.vpnLibrary.server.bootstrap.SocketChild;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 public class GetNameChannel implements IChannel {
     private SocketChild child;
@@ -20,7 +18,11 @@ public class GetNameChannel implements IChannel {
         if (child == null) return;
 
         NameMessage message = (NameMessage) getMessage();
-        child.setName(message.getName());
+        String name = message.getName();
+        if (checkIfThereClientConnectedAlready(name)) {
+            writeMessage(new DisconnectMessage().setErrorMessage("Office with name: "+name+" Already Connected"));
+        } else
+            child.setName(name);
     }
 
     @Override
@@ -39,5 +41,16 @@ public class GetNameChannel implements IChannel {
         return BaseMessage.createMessage(buffer);
     }
 
+    private boolean checkIfThereClientConnectedAlready(String name) {
+        for (SocketChild c : ServerBootstrap.clients) {
+            if (Objects.equals(c.getName(), name)) {
+                if (c.isConnected()) {
+                    return true;
+                }
+                ServerBootstrap.clients.remove(c);
+            }
+        }
+        return false;
+    }
 
 }
