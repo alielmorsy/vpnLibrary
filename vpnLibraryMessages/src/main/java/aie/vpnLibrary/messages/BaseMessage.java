@@ -12,6 +12,7 @@ public abstract class BaseMessage implements IMessage {
     public final static int NAME_MESSAGE = 10;
     public final static int ERROR_MESSAGE = -1;
     public final static int DISCONNECT_MESSAGE = -2;
+    public final static int GET_IP_MESSAGE = 2;
 
     public int getMessageType() {
         return messageType;
@@ -24,6 +25,7 @@ public abstract class BaseMessage implements IMessage {
     }
 
     public static IMessage createMessage(ByteBuffer byteBuffer) {
+        if (byteBuffer == null) return null;
         ((Buffer) byteBuffer).position(0);
         switch ((int) byteBuffer.get()) {
             case REQUEST_MESSAGE:
@@ -40,6 +42,8 @@ public abstract class BaseMessage implements IMessage {
                 return new ErrorMessage().construct(byteBuffer);
             case DISCONNECT_MESSAGE:
                 return new DisconnectMessage().construct(byteBuffer);
+            case GET_IP_MESSAGE:
+                return new GetIPMessage().construct(byteBuffer);
         }
         return null;
     }

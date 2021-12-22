@@ -22,7 +22,11 @@ import org.apache.http.impl.cookie.BasicClientCookie;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -80,7 +84,7 @@ public class ConnectionManager {
 
     public ResponseMessage requestPOST(RequestMessage request) {
         HttpPost post = new HttpPost(request.getUrl());
-      //  HttpPost post = new HttpPost("http://127.0.0.1/a.php");
+        //  HttpPost post = new HttpPost("http://127.0.0.1/a.php");
         for (Map.Entry<String, String> headers :
                 request.getAdditionalHeaders().entrySet()) {
             post.addHeader(headers.getKey(), headers.getValue());
@@ -119,7 +123,7 @@ public class ConnectionManager {
 
     private HttpResponse createRequest(HttpRequestBase request, List<aie.vpnLibrary.messages.models.Cookie> cookies) {
         try {
-          //  request.addHeader("Accept", "image/jpeg, application/x-ms-application, image/gif, application/xaml+xml, image/pjpeg, application/x-ms-xbap, application/msword, application/vnd.ms-powerpoint, application/vnd.ms-excel, */*");
+            //  request.addHeader("Accept", "image/jpeg, application/x-ms-application, image/gif, application/xaml+xml, image/pjpeg, application/x-ms-xbap, application/msword, application/vnd.ms-powerpoint, application/vnd.ms-excel, */*");
 
 
             HttpClientContext context = new HttpClientContext();
@@ -181,5 +185,14 @@ public class ConnectionManager {
         };
         sslContext.init(null, new TrustManager[]{trustManager}, null);
         return sslContext;
+    }
+
+    public String getIP() throws IOException {
+        URL whatismyip = new URL("http://checkip.amazonaws.com");
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+                whatismyip.openStream()));
+
+        String ip = in.readLine();
+        return ip;
     }
 }

@@ -21,6 +21,7 @@ public class ClientThread extends Thread {
     private OutputStream os;
 
     private String name;
+    private Socket socket;
 
     public ClientThread(boolean withCharles, String ip, int port, String name) {
         this.withCharles = withCharles;
@@ -32,7 +33,7 @@ public class ClientThread extends Thread {
     @Override
     public void run() {
         try {
-            Socket socket = new Socket(ip, port);
+            socket = new Socket(ip, port);
             socket.setKeepAlive(true);
             socket.setSoTimeout(5 * 60 * 1000);
             is = socket.getInputStream();
@@ -55,7 +56,6 @@ public class ClientThread extends Thread {
                 if (message.getMessageType() == BaseMessage.GET_NAME_MESSAGE) {
                     writeData(new NameMessage().setName(name).buildMessage());
                 } else if (message.getMessageType() == BaseMessage.KEEP_ALIVE) {
-
                     continue;
                 } else if (message.getMessageType() == BaseMessage.REQUEST_MESSAGE) {
                     RequestMessage requestMessage = (RequestMessage) message;
@@ -67,8 +67,16 @@ public class ClientThread extends Thread {
                         rm = ConnectionManager.getInstance(withCharles).requestPOST(requestMessage);
                     }
                     writeData(rm.buildMessage());
-
-
+                } else if (message.getMessageType() == BaseMessage.DISCONNECT_MESSAGE) {
+                    DisconnectMessage dm = (DisconnectMessage) message;
+                    System.out.println(dm.getErrorMessage());
+                    socket.close();
+                    System.exit(0);
+                } else if (message.getMessageType() == BaseMessage.GET_IP_MESSAGE) {
+                    GetIPMessage ip = new GetIPMessage();
+                    ip.setState(GetIPMessage.SET);
+                    ip.setIp(ConnectionManager.getInstance(false).getIP());
+                    writeData(ip.buildMessage());
                 }
 
             }
@@ -117,6 +125,10 @@ public class ClientThread extends Thread {
             ((Buffer) buffer).position(0);
             return buffer;
         } catch (Exception e) {
+            if (!socket.isConnected()) {
+                System.out.println("Server Disconnected");
+                System.exit(0);
+            }
             e.printStackTrace();
         }
 
@@ -134,10 +146,7 @@ public class ClientThread extends Thread {
             byte[] bytes;
             while (true) {
                 int size = Math.abs(total - sent);
-
-
                 if (size > 1024) {
-
 
                     bytes = new byte[1024];
                     byteBuffer.get(bytes);
@@ -150,10 +159,17 @@ public class ClientThread extends Thread {
                     os.write(bytes);
                     bytes = null;
                     byteBuffer = null;
+                    Thread.sleep(50);
+                    os.flush();
                     return;
                 }
             }
         } catch (Exception e) {
+            if (!socket.isConnected()) {
+                System.out.println("Server Disconnected");
+                System.exit(0);
+            }
+            e.printStackTrace();
 
         }
     }

@@ -23,7 +23,7 @@ public class Test {
             @Override
             public void run() {
                 try {
-                    String a= Arrays.toString(new ConnectionManager("a") {
+                    String a= new ConnectionManager("a") {
                         @Override
                         public void editRequest(RequestMessage requestMessage) {
                             requestMessage.setHeader("Accept", "image/jpeg  application/x-ms-application \0 image/gif\0  application/xaml+xml  image/pjpeg  application/x-ms-xbap \0 application/msword\0 application/vnd.ms-powerpoint\0 application/vnd.ms-excel\0 */*");
@@ -34,7 +34,7 @@ public class Test {
                             }
                             requestMessage.setHeader("Refer", requestMessage.getUrl());
                         }
-                    }.requestGET("http://www.google.com"));
+                    }.getIP();
                     System.out.println(a);
                 } catch (UserNotFoundException | OfficeInUse | RequestException e) {
                     e.printStackTrace();

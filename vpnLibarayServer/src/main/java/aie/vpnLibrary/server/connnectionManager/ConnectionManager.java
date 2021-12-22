@@ -1,5 +1,7 @@
 package aie.vpnLibrary.server.connnectionManager;
 
+import aie.vpnLibrary.messages.BaseMessage;
+import aie.vpnLibrary.messages.GetIPMessage;
 import aie.vpnLibrary.messages.RequestMessage;
 import aie.vpnLibrary.messages.ResponseMessage;
 import aie.vpnLibrary.messages.enums.MethodType;
@@ -25,6 +27,8 @@ public abstract class ConnectionManager implements IConnection {
     protected List<Cookie> cookies = new ArrayList<>();
 
     private SocketChild client;
+
+    private String ip;
 
 
     public ConnectionManager(String clientName) throws UserNotFoundException, OfficeInUse {
@@ -120,7 +124,7 @@ public abstract class ConnectionManager implements IConnection {
 
     private ResponseMessage runRequest(RequestMessage message) {
         try {
-             message.getCookies().addAll(cookies);
+            message.getCookies().addAll(cookies);
             System.out.println("Write Message");
             client.getMainChannel().writeMessage(message);
             try {
@@ -156,4 +160,31 @@ public abstract class ConnectionManager implements IConnection {
 
         return m.getData();
     }
+
+    @Override
+    public String getIP() throws UserNotFoundException, RequestException {
+        if (ip != null) {
+            return ip;
+        }
+        if (!client.isConnected()) {
+            throw new UserNotFoundException(client.getName());
+        }
+        GetIPMessage message = new GetIPMessage().setState(GetIPMessage.GET);
+        try {
+            client.getMainChannel().writeMessage(message);
+            BaseMessage message1 = (BaseMessage) client.getMainChannel().getMessage();
+            if (!(message1 instanceof GetIPMessage)) {
+                throw new RequestException(client.getName(), "Requests entered in each other", -500);
+            }
+            message = (GetIPMessage) message1;
+            ip = message.getIp();
+            return ip;
+        } catch (IOException e) {
+            e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
+
+        }
+        return null;
+    }
+
+
 }

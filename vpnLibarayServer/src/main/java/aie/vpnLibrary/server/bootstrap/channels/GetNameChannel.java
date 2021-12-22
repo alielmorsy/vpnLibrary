@@ -18,6 +18,9 @@ public class GetNameChannel implements IChannel {
         if (child == null) return;
 
         NameMessage message = (NameMessage) getMessage();
+        if(message==null){
+            writeMessage(new DisconnectMessage().setErrorMessage("Failed To Init that client Please Try again"));
+        }
         String name = message.getName();
         if (checkIfThereClientConnectedAlready(name)) {
             writeMessage(new DisconnectMessage().setErrorMessage("Office with name: "+name+" Already Connected"));

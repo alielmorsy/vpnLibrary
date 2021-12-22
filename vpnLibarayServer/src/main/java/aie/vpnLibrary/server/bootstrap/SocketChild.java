@@ -85,9 +85,7 @@ public class SocketChild {
         } catch (Exception e) {
 
             e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
-            ServerBootstrap.clients.remove(this);
-            //observer.onDisconnected(this);
-            connected = false;
+            close();
         }
 
         return null;
@@ -123,15 +121,28 @@ public class SocketChild {
             }
         } catch (Exception e) {
             e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
-            connected = false;
-            ServerBootstrap.clients.remove(this);
+            close();
         }
         return false;
     }
 
-    public void setObserver(OnUserDisconnected observer) {
-        this.observer = observer;
+    public void close() {
+        try {
+            is.close();
+            os.flush();
+            os.close();
+            socket.close();
+            connected = false;
+            is = null;
+            os = null;
+            socket = null;
+            ServerBootstrap.clients.remove(this);
+            System.gc();
+        } catch (Exception e) {
+            e.printStackTrace(Debug.VPN_EXCEPTION_DEBUG);
+        }
     }
+
 
     public IChannel getMainChannel() {
         return mainChannel;

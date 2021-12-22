@@ -19,8 +19,11 @@ public interface IConnection {
 
 
     byte[] requestPOST(String url, String data, PostType contentType) throws UserNotFoundException, RequestException;
+
     byte[] requestPOST(String url, byte[] data, PostType contentType) throws UserNotFoundException, RequestException;
 
 
     void releaseClient() throws UserNotFoundException;
+
+    String getIP() throws UserNotFoundException, RequestException;
 }
