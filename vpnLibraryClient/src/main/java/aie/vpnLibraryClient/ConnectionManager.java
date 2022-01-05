@@ -20,6 +20,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BasicClientCookie;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.BufferedReader;
@@ -183,7 +184,9 @@ public class ConnectionManager {
                 return new X509Certificate[0];
             }
         };
+
         sslContext.init(null, new TrustManager[]{trustManager}, null);
+        sslContext.getDefaultSSLParameters().setProtocols(new String[]{"TLSv1", "TLSv1.1", "TLSv1.2", "TLSv1.3"});
         return sslContext;
     }
 
