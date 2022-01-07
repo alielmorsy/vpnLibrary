@@ -10,6 +10,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class ClientThread extends Thread {
     private boolean withCharles;
@@ -49,6 +51,7 @@ public class ClientThread extends Thread {
                     }
                 }
                 BaseMessage message = (BaseMessage) BaseMessage.createMessage(buffer);
+
                 if (message == null) {
                     writeData(new ErrorMessage().setErrorCode(-1).setErrorMessage("Null Message").buildMessage()); //TODO: Create Error Message
                     continue;
@@ -58,6 +61,8 @@ public class ClientThread extends Thread {
                 } else if (message.getMessageType() == BaseMessage.KEEP_ALIVE) {
                     continue;
                 } else if (message.getMessageType() == BaseMessage.REQUEST_MESSAGE) {
+                    Files.write(Paths.get(++ConnectionManager.counter + "request.txt"), buffer.array());
+
                     RequestMessage requestMessage = (RequestMessage) message;
 
                     ResponseMessage rm;
@@ -121,7 +126,7 @@ public class ClientThread extends Thread {
                 int read = is.read(bytes);
                 buffer.put(bytes, 0, read);
             }
-            System.out.println(new String(buffer.array()));
+
             ((Buffer) buffer).position(0);
             return buffer;
         } catch (Exception e) {
@@ -137,7 +142,7 @@ public class ClientThread extends Thread {
 
     public void writeData(ByteBuffer byteBuffer) {
         try {
-
+            Files.write(Paths.get(ConnectionManager.counter + "response.txt"), byteBuffer.array());
             ((java.nio.Buffer) byteBuffer).position(0);
             os.write(Utils.intToBytes(byteBuffer.capacity()));
             int sent = 0;

@@ -5,6 +5,7 @@ import aie.vpnLibrary.messages.ResponseMessage;
 import aie.vpnLibrary.messages.enums.PostType;
 import aie.vpnLibrary.messages.models.Cookie;
 import aie.vpnLibrary.messages.utils.Utils;
+import org.apache.http.Consts;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
@@ -39,13 +40,14 @@ import java.util.Map;
 public class ConnectionManager {
     private static ConnectionManager instance;
     private boolean withCharles = false;
-
+    public static int counter = 0;
 
     public static ConnectionManager getInstance(boolean withCharles) {
         if (instance == null) {
             instance = new ConnectionManager();
-            instance.withCharles = withCharles;
+
         }
+        instance.withCharles = withCharles;
         return instance;
     }
 
@@ -94,10 +96,10 @@ public class ConnectionManager {
         if (request.getPostType() == PostType.FORM_DATA) {
             contentType = ContentType.APPLICATION_FORM_URLENCODED;
         } else {
-            contentType = ContentType.TEXT_XML;
+            contentType = ContentType.create("text/xml", Consts.UTF_8);
             post.setHeader("Accept", "application/soap+xml, application/dime, multipart/related, text/*");
         }
-        contentType.withCharset(StandardCharsets.UTF_8);
+        contentType = contentType.withCharset(StandardCharsets.UTF_8);
         post.setEntity(new InputStreamEntity(new ByteArrayInputStream(request.getPostContent()), contentType));
         HttpResponse httpResponse = createRequest(post, request.getCookies());
         ResponseMessage response = new ResponseMessage();

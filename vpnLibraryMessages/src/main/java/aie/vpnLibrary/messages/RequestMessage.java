@@ -95,8 +95,9 @@ public class RequestMessage extends BaseMessage {
 
         String[] a = s.split(",");
         for (String header : a) {
+            System.out.println("Header: " + header);
             String[] hh = header.replace('\0', ',').split(":");
-            additionalHeaders.put(hh[0], hh[1]);
+            additionalHeaders.put(hh[0], hh[1].replace('\1', ':'));
         }
     }
 
@@ -135,6 +136,7 @@ public class RequestMessage extends BaseMessage {
 
 
     public void setHeader(String name, String value) {
+        value = value.replace(':', '\1');
         additionalHeaders.put(name, value);
     }
 
